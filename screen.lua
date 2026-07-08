@@ -16,7 +16,7 @@ local Size            = require("ui/size")
 local UIManager       = require("ui/uimanager")
 local VerticalGroup   = require("ui/widget/verticalgroup")
 local VerticalSpan    = require("ui/widget/verticalspan")
-local _               = require("gettext")
+local _               = require("i18n")
 local T               = require("ffi/util").template
 
 local ScreenBase           = require("screen_base")
@@ -103,7 +103,7 @@ function AnagramScreen:buildLayout()
         board       = self.board,
         max_width   = board_max_w,
         max_height  = board_max_h,
-        onLetterTap = function(i) self:onLetterTap(i) end,
+        letterTapCallback = function(i) self:onLetterTap(i) end,
     }
 
     local board_frame = FrameContainer:new{
