@@ -19,10 +19,10 @@ local C_DIM     = Blitbuffer.COLOR_GRAY_9
 -- ---------------------------------------------------------------------------
 
 local AnagramBoardWidget = InputContainer:extend{
-    board       = nil,
-    max_width   = 300,
-    max_height  = 120,
-    onLetterTap = nil,
+    board             = nil,
+    max_width         = 300,
+    max_height        = 120,
+    letterTapCallback = nil,
 }
 
 function AnagramBoardWidget:init()
@@ -55,7 +55,7 @@ function AnagramBoardWidget:onLetterTap(ges)
     if ly >= 0 and ly < self.cell then
         local idx = math.floor(lx / self.cell) + 1
         if idx >= 1 and idx <= self.n then
-            if self.onLetterTap then self.onLetterTap(idx) end
+            if self.letterTapCallback then self.letterTapCallback(idx) end
         end
     end
     return true
