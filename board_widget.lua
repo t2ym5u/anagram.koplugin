@@ -35,27 +35,35 @@ function AnagramBoardWidget:init()
     self.w    = cell * n
     self.h    = cell * 2 + 8
     self.dimen = Geom:new{ w = self.w, h = self.h }
-    self.paint_rect = nil
+    self.paint_rect = Geom:new{ x = 0, y = 0, w = self.w, h = self.h }
 
     local face_sz = math.max(7, math.floor(cell * 0.55))
     self.letter_face = Font:getFace("smallinfofont", face_sz)
 
     self.ges_events = {
-        LetterTap = { GestureRange:new{ ges = "tap", range = self.dimen } },
+        LetterTap = { GestureRange:new{ ges = "tap", range = function() return self.paint_rect end } },
     }
 end
 
-function AnagramBoardWidget:onLetterTap(ges)
-    if not self.paint_rect then return true end
+function AnagramBoardWidget:onLetterTap(_, ges)
+    if not (ges and ges.pos) or not self.paint_rect then return true end
     local rect = self.paint_rect
     local lx = ges.pos.x - rect.x
     local ly = ges.pos.y - rect.y
     if lx < 0 or ly < 0 or lx >= self.w then return true end
-    -- only top row (scrambled) is tappable
-    if ly >= 0 and ly < self.cell then
+    local gap = 8
+    if ly < self.cell then
+        -- top row: tap scrambled letter to add to answer
         local idx = math.floor(lx / self.cell) + 1
-        if idx >= 1 and idx <= self.n then
-            if self.letterTapCallback then self.letterTapCallback(idx) end
+        if idx >= 1 and idx <= self.n and self.letterTapCallback then
+            self.letterTapCallback(idx)
+        end
+    elseif ly >= self.cell + gap then
+        -- bottom row: tap placed letter to return it to pool
+        local idx = math.floor(lx / self.cell) + 1
+        local current = self.board.current
+        if idx >= 1 and idx <= #current and self.letterTapCallback then
+            self.letterTapCallback(current[idx])
         end
     end
     return true
