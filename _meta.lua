@@ -3,5 +3,5 @@ return {
     name        = "anagram",
     fullname    = _("Anagram"),
     description = _("Rearrange letters to find words"),
-    version     = "1.2.1",
+    version     = "1.2.2",
 }
