@@ -1,28 +1,12 @@
-local WORDS_EN = {
-    "PROBLEM", "KITCHEN", "BLANKET", "CHAPTER", "DANCING", "EASTERN",
-    "FACTORY", "GARDENS", "HUNTERS", "JOURNEY", "KINGDOM", "LANTERN",
-    "MASTERS", "NETWORK", "OPTIMUM", "PAINTED", "QUALIFY", "ROLLING",
-    "SCENERY", "TEACHER", "UNIFORM", "VITAMIN", "WARNING", "XYLOPHONES",
-    "YOUNGER", "ZOOLOGY", "CAMPING", "DECODER", "ENGLISH", "FLOWERS",
-    "GENERAL", "HARVEST", "IMAGINE", "LIBRARY", "MACHINE", "NATURAL",
-    "OPENING", "PRESENT", "QUARTER", "ROMANCE", "SUNRISE", "TEXTURE",
-    "UNIFORM", "VENTURE", "WEATHER", "EXPRESS", "FINDING", "GLOWING",
-    "HEARING", "INSPIRE", "JUSTICE", "KNOWING", "LEISURE", "MORNING",
-    "NOTHING", "OLYMPUS", "PASSION", "QUANTUM", "RADIANT", "STUDENT",
-}
+local _dir = debug.getinfo(1, "S").source:sub(2):match("(.*[/\\])") or "./"
 
-local WORDS_FR = {
-    "MAISONS", "JARDINS", "RIVIERE", "SOLAIRE", "NUAGEUX", "PIERRES",
-    "ETOILES", "BALLONS", "CANARDS", "RENARDS", "DRAGONS", "FLEURES",
-    "DESERTS", "BATEAUX", "CERISES", "ORANGES", "FRAISES", "CITRONS",
-    "ANANAS", "RAISINS", "MANGUES", "BANANES", "CAROTTES", "TOMATES",
-    "POISSON", "POULETS", "LEGUMES", "FROMAGE", "BOISSON", "TABLEAU",
-    "FENETRE", "VOITURE", "CHEMINS", "RIVAGES", "MONTAGE", "PAYSAGE",
-    "COULEUR", "MATIERE", "LUMIERE", "RAPPORT", "SCIENCE", "THEATRE",
-    "VILLAGE", "CHATEAU", "FALAISE", "POESIE", "BALLADE", "CHANSON",
-    "ROMANCE", "CONCERT", "MUSIQUE", "DESIRER", "REVERIE", "SOUVENIR",
-    "PASSION", "COURAGE", "VICTOIRE", "BONHEUR", "LIBERTE", "SAGESSE",
-}
+local function loadWordList(name)
+    local fn = loadfile(_dir .. name .. ".lua")
+    return fn and fn() or {}
+end
+
+local WORDS_EN = loadWordList("words_en")
+local WORDS_FR = loadWordList("words_fr")
 
 -- ---------------------------------------------------------------------------
 -- AnagramBoard
