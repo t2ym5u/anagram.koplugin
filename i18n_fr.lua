@@ -4,4 +4,12 @@ return {
     ["Wins: %1  Losses: %2"]         = { fr = "Victoires : %1  Défaites : %2" },
     ["Anagram"]                            = { fr = "Anagramme" },
     ["Rearrange letters to find words"]    = { fr = "Réarrangez les lettres pour trouver des mots" },
+    ["Word length"]                        = { fr = "Longueur des mots" },
+    ["Random (4-7)"]                       = { fr = "Aléatoire (4-7)" },
+    ["Random"]                             = { fr = "Aléatoire" },
+    ["4 letters"]                          = { fr = "4 lettres" },
+    ["5 letters"]                          = { fr = "5 lettres" },
+    ["6 letters"]                          = { fr = "6 lettres" },
+    ["7 letters"]                          = { fr = "7 lettres" },
+    ["Length: %1"]                         = { fr = "Longueur : %1" },
 }
