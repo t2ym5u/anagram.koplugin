@@ -8,6 +8,20 @@ end
 local WORDS_EN = loadWordList("words_en")
 local WORDS_FR = loadWordList("words_fr")
 
+local function groupByLength(list)
+    local by_len = {}
+    for _, word in ipairs(list) do
+        local len = #word
+        by_len[len] = by_len[len] or {}
+        local bucket = by_len[len]
+        bucket[#bucket + 1] = word
+    end
+    return by_len
+end
+
+local WORDS_EN_BY_LEN = groupByLength(WORDS_EN)
+local WORDS_FR_BY_LEN = groupByLength(WORDS_FR)
+
 -- ---------------------------------------------------------------------------
 -- AnagramBoard
 -- ---------------------------------------------------------------------------
@@ -19,6 +33,7 @@ function AnagramBoard:new(opts)
     opts = opts or {}
     local obj = setmetatable({
         lang     = opts.lang or "en",
+        length   = opts.length or "random",
         secret   = "",
         scrambled = {},
         current  = {},
@@ -33,8 +48,17 @@ function AnagramBoard:_wordList()
     return self.lang == "fr" and WORDS_FR or WORDS_EN
 end
 
+function AnagramBoard:_wordListByLen()
+    return self.lang == "fr" and WORDS_FR_BY_LEN or WORDS_EN_BY_LEN
+end
+
 function AnagramBoard:newGame()
-    local list = self:_wordList()
+    local list
+    local len = tonumber(self.length)
+    if len then
+        list = self:_wordListByLen()[len]
+    end
+    list = list or self:_wordList()
     local word = list[math.random(#list)]
     self.secret = word:upper()
 
@@ -119,6 +143,7 @@ function AnagramBoard:serialize()
     end
     return {
         lang      = self.lang,
+        length    = self.length,
         secret    = self.secret,
         scrambled = sc,
         current   = self.current,
@@ -130,6 +155,7 @@ end
 function AnagramBoard:load(data)
     if type(data) ~= "table" or not data.secret then return false end
     self.lang    = data.lang    or "en"
+    self.length  = data.length  or "random"
     self.secret  = data.secret  or ""
     self.wins    = data.wins    or 0
     self.losses  = data.losses  or 0

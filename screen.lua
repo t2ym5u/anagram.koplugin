@@ -53,9 +53,10 @@ Soumettez votre réponse quand vous pensez avoir trouvé le bon mot.
 local AnagramScreen = ScreenBase:extend{}
 
 function AnagramScreen:init()
-    local state = self.plugin:loadState()
-    local lang  = self.plugin:getSetting("lang", "en")
-    self.board  = AnagramBoard:new{ lang = lang }
+    local state  = self.plugin:loadState()
+    local lang   = self.plugin:getSetting("lang", "en")
+    local length = self.plugin:getSetting("length", "random")
+    self.board   = AnagramBoard:new{ lang = lang, length = length }
     if not self.board:load(state) then
         -- fresh game
     end
@@ -77,8 +78,9 @@ function AnagramScreen:buildLayout()
 
     local title_bar = self:buildTitleBar(_("Anagram"), function()
         return {
-            { text = _("New game"),     callback = function() self:onNewGame() end },
-            { text = self:_langLabel(), callback = function() self:openLangMenu() end },
+            { text = _("New game"),       callback = function() self:onNewGame() end },
+            { text = self:_langLabel(),   callback = function() self:openLangMenu() end },
+            { text = self:_lengthLabel(), callback = function() self:openLengthMenu() end },
             self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
         }
     end)
@@ -170,8 +172,10 @@ function AnagramScreen:onClear()
 end
 
 function AnagramScreen:onNewGame()
-    local lang = self.plugin:getSetting("lang", "en")
-    self.board.lang = lang
+    local lang   = self.plugin:getSetting("lang", "en")
+    local length = self.plugin:getSetting("length", "random")
+    self.board.lang   = lang
+    self.board.length = length
     local wins   = self.board.wins
     local losses = self.board.losses
     self.board:newGame()
@@ -203,6 +207,27 @@ function AnagramScreen:openLangMenu()
     }
 end
 
+function AnagramScreen:openLengthMenu()
+    local items = {
+        { id = "random", text = _("Random (4-7)") },
+        { id = "4",       text = _("4 letters") },
+        { id = "5",       text = _("5 letters") },
+        { id = "6",       text = _("6 letters") },
+        { id = "7",       text = _("7 letters") },
+    }
+    MenuHelper.openPickerMenu{
+        title      = _("Word length"),
+        items      = items,
+        current_id = self.plugin:getSetting("length", "random"),
+        parent     = self,
+        on_select  = function(length)
+            self.plugin:saveSetting("length", length)
+            self.board.length = length
+            self:onNewGame()
+        end,
+    }
+end
+
 function AnagramScreen:updateStatus(msg)
     local status
     if msg then
@@ -216,6 +241,14 @@ end
 function AnagramScreen:_langLabel()
     local lang = self.plugin:getSetting("lang", "en")
     return lang == "fr" and "FR" or "EN"
+end
+
+function AnagramScreen:_lengthLabel()
+    local length = self.plugin:getSetting("length", "random")
+    if length == "random" then
+        return T(_("Length: %1"), _("Random"))
+    end
+    return T(_("Length: %1"), length)
 end
 
 return AnagramScreen
