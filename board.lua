@@ -1,4 +1,10 @@
 local _dir = debug.getinfo(1, "S").source:sub(2):match("(.*[/\\])") or "./"
+local Time = require("ui/time")
+
+-- Reseed with microsecond resolution: the app-wide seed (os.time(), 1s
+-- resolution) can repeat across quick relaunches, always picking the same
+-- first word.
+math.randomseed(Time.to_us(Time.realtime()))
 
 local function loadWordList(name)
     local fn = loadfile(_dir .. name .. ".lua")
