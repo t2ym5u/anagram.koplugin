@@ -4,7 +4,7 @@ return {
     ["Wins: %1  Losses: %2"]         = { fr = "Victoires : %1  Défaites : %2", es = "Victorias: %1  Derrotas: %2", de = "Siege: %1  Niederlagen: %2" },
     ["Anagram"]                            = { fr = "Anagramme", es = "Anagrama", de = "Anagramm" },
     ["Rearrange letters to find words"]    = { fr = "Réarrangez les lettres pour trouver des mots", es = "Reordena las letras para formar palabras", de = "Ordne die Buchstaben neu, um Wörter zu finden" },
-    ["Word length"]                        = { fr = "Longueur des mots", es = "Longitud de palabra", de = "Wortlänge" },
+    ["Word lengths"]                        = { fr = "Longueur des mots", es = "Longitud de palabra", de = "Wortlänge" },
     ["Random (4-7)"]                       = { fr = "Aléatoire (4-7)", es = "Aleatorio (4-7)", de = "Zufällig (4-7)" },
     ["Random"]                             = { fr = "Aléatoire", es = "Aleatorio", de = "Zufällig" },
     ["4 letters"]                          = { fr = "4 lettres", es = "4 letras", de = "4 Buchstaben" },
