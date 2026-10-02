@@ -218,7 +218,7 @@ function AnagramScreen:openLengthMenu()
         { id = "7",       text = _("7 letters") },
     }
     MenuHelper.openPickerMenu{
-        title      = _("Word length"),
+        title      = _("Word lengths"),
         items      = items,
         current_id = self.plugin:getSetting("length", "random"),
         parent     = self,

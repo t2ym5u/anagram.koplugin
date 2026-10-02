@@ -6,6 +6,17 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.3.12] - 2026-10-02
+
+### Fixed
+- `Word length` became `Word lengths`. `package.loaded` is keyed by module
+  name alone, so every `require("i18n")` on the device resolves to one module
+  and the first plugin loaded wins it. Every plugin's `i18n_fr.lua` merges
+  into that one shared table, where plugins silently overwrite each other's
+  translations. wordladder deals with a single word and translates this as
+  "Longueur du mot", which was overwriting the plural this plugin needs.
+  Distinct keys let both be right.
+
 ## [1.3.11] - 2026-10-01
 
 ### Fixed
