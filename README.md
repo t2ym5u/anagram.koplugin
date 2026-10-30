@@ -8,12 +8,14 @@ A word anagram puzzle plugin for [KOReader](https://github.com/koreader/koreader
 
 ## Rules
 
-Rearrange the scrambled letters to form a valid word. All letters must be used exactly once. Tap a letter to move it between the scramble and your answer. Submit when you have formed a valid word.
+Rearrange the scrambled letters to form a valid word, using every letter exactly once. Some letters make several words: there is one answer row per word to find, and the round is won once every row is filled. Tap a tile at the bottom to add it to your answer, tap a letter in the answer to give it back, and submit.
 
 ## Features
 
 - **Large word dictionary** — English and French word lists
-- **Hint** — reveals one letter in its correct position
+- **One row per word** — STABLE and TABLES make two rows; every real word that uses all the letters fills one
+- **No penalty for a wrong guess** — the letters go back and you try again; **Give up** shows the missed words and counts a loss
+- **Clean word lists** — no proper nouns, abbreviations or vulgar words
 - **Auto-save** — current puzzle restored on next launch
 
 ## Installation
@@ -27,10 +29,11 @@ Rearrange the scrambled letters to form a valid word. All letters must be used e
 
 | Action | How |
 |--------|-----|
-| Add letter to answer | Tap scrambled letter |
-| Return letter to scramble | Tap answer letter |
+| Add letter to answer | Tap a tile (bottom row) |
+| Return letter to the tiles | Tap the letter in the answer row |
 | Submit answer | Tap **Submit** |
-| New puzzle | Tap **New** |
+| Give up | Tap **Give up** |
+| Next puzzle | Tap **Next word** once the round is over, or **New game** in the menu |
 | Show rules | Tap **Rules** |
 
 ## License

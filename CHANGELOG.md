@@ -6,6 +6,40 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.4.0] - 2026-10-30
+
+### Added
+- One answer row per word the letters make: STABLE and TABLES give two rows,
+  ARTISTE four. The round is won once every row is filled; the status shows
+  "Words: 1/4". Any real word that uses all the letters fills a row -- a rare
+  dictionary word counts too, but is never required.
+- A "Give up" button: it shows the words you missed in the empty rows and
+  counts a loss.
+
+### Changed
+- The letter tiles are at the bottom, next to the buttons and under the
+  thumb; the answer rows read from the top, the one being filled framed in
+  bold.
+- A wrong answer no longer reveals the word and counts a loss: the letters go
+  back to the tiles and you try again. A word already found is refused the
+  same way. Only giving up counts as a loss. The rules say so.
+- Once the round is over, the action bar shows "Next word" in place of
+  Submit/Clear/Give up, and the letters stop moving.
+- Redesigned play screen: tiles fill the room the controls leave, with
+  letters fitted to and centred in their tile (a short word no longer gets
+  tiles twice the size of a long one), and a full-width action bar (two rows
+  in landscape). The status reads "Words: 1/4 · Wins: 3 · Losses: 1" and
+  wraps in landscape.
+- Title-bar menu: the language entry reads "Language: EN" instead of a bare
+  "EN", and the length picker is titled "Length".
+
+### Fixed
+- The word lists no longer draw proper nouns or abbreviations (DAVID, USSR:
+  1,312 English words dropped) nor vulgar words and slurs (a blocklist per
+  language in `tools/`). `tools/build_words.py` cleans the lists against
+  Boggle's Scrabble-valid dictionary and generates `answers_en.lua` /
+  `answers_fr.lua`, the other words each puzzle accepts.
+
 ## [1.3.13] - 2026-10-07
 
 ### Fixed
