@@ -28,6 +28,40 @@ end
 local WORDS_EN_BY_LEN = groupByLength(WORDS_EN)
 local WORDS_FR_BY_LEN = groupByLength(WORDS_FR)
 
+local function sortedLetters(word)
+    local t = {}
+    for i = 1, #word do t[i] = word:sub(i, i) end
+    table.sort(t)
+    return table.concat(t)
+end
+
+-- The drawn words grouped by their letters: a puzzle shows one answer row per
+-- drawn word made of its letters (STABLE, TABLES: two rows). Built on the
+-- first puzzle of a language, not at startup.
+local BY_LETTERS = {}
+local function wordsWithLetters(lang, letters)
+    if not BY_LETTERS[lang] then
+        local index = {}
+        for _, w in ipairs(lang == "fr" and WORDS_FR or WORDS_EN) do
+            local k = sortedLetters(w)
+            index[k] = index[k] or {}
+            table.insert(index[k], w)
+        end
+        BY_LETTERS[lang] = index
+    end
+    return BY_LETTERS[lang][sortedLetters(letters)] or {}
+end
+
+-- Other real words made of the same letters (answers_<lang>.lua, generated
+-- from boggle's full dictionary). Loaded on the first answer, not at startup.
+local ANSWERS = {}
+local function otherAnswers(lang)
+    if not ANSWERS[lang] then
+        ANSWERS[lang] = loadWordList("answers_" .. lang)
+    end
+    return ANSWERS[lang]
+end
+
 -- ---------------------------------------------------------------------------
 -- AnagramBoard
 -- ---------------------------------------------------------------------------
@@ -45,6 +79,7 @@ function AnagramBoard:new(opts)
         current  = {},
         wins     = opts.wins   or 0,
         losses   = opts.losses or 0,
+        result   = nil,   -- nil while playing, "win" or "lost" once over
     }, self)
     obj:newGame()
     return obj
@@ -86,13 +121,37 @@ function AnagramBoard:newGame()
     for _, ch in ipairs(letters) do
         self.scrambled[#self.scrambled + 1] = { letter = ch, used = false }
     end
-    self.current = {}
+    self.current  = {}
+    self.result   = nil
+    self:_setTargets()
+end
+
+-- targets: the drawn words this puzzle's letters make, one answer row each;
+-- found: what the player has entered, row by row (any real word counts, so
+-- a rare dictionary word can fill a row too); revealed: the targets shown
+-- in the rows left empty after giving up.
+function AnagramBoard:_setTargets()
+    self.targets = {}
+    for _, w in ipairs(wordsWithLetters(self.lang, self.secret)) do
+        self.targets[#self.targets + 1] = w
+    end
+    if #self.targets == 0 then self.targets = { self.secret } end
+    self.found    = {}
+    self.revealed = {}
+end
+
+function AnagramBoard:getRowCount()
+    return #self.targets
+end
+
+function AnagramBoard:isOver()
+    return self.result ~= nil
 end
 
 -- Toggle letter i (1-based) in/out of current answer
 function AnagramBoard:tapLetter(i)
     local slot = self.scrambled[i]
-    if not slot then return end
+    if not slot or self.result then return end
     if slot.used then
         -- remove from current
         for j = #self.current, 1, -1 do
@@ -113,20 +172,53 @@ function AnagramBoard:clearCurrent()
     self.current = {}
 end
 
--- Returns "win", "wrong", "too_short"
+-- Returns "found" (a row filled, more to find), "win" (all rows filled),
+-- "already", "wrong" or "too_short". Any real word made of all the letters
+-- fills a row, not only the drawn ones (TABLES for STABLE). A wrong answer
+-- costs nothing -- the letters go back and the player tries again; only
+-- giving up counts as a loss.
 function AnagramBoard:submit()
+    if self.result then return self.result end
     if #self.current < #self.secret then return "too_short" end
+    local answer = self:getAnswer()
+    self:clearCurrent()
+    for _, w in ipairs(self.found) do
+        if w == answer then return "already" end
+    end
+    local valid = otherAnswers(self.lang)[answer]
+    for _, w in ipairs(self.targets) do
+        if w == answer then valid = true end
+    end
+    if not valid then return "wrong" end
+    self.found[#self.found + 1] = answer
+    if #self.found < #self.targets then return "found" end
+    self.wins   = self.wins + 1
+    self.result = "win"
+    return "win"
+end
+
+-- Counts as a loss and fills the rows left empty with drawn words the player
+-- did not find.
+function AnagramBoard:giveUp()
+    if self.result then return end
+    self.losses = self.losses + 1
+    self.result = "lost"
+    self:clearCurrent()
+    local found = {}
+    for _, w in ipairs(self.found) do found[w] = true end
+    self.revealed = {}
+    for _, w in ipairs(self.targets) do
+        if #self.found + #self.revealed >= #self.targets then break end
+        if not found[w] then self.revealed[#self.revealed + 1] = w end
+    end
+end
+
+function AnagramBoard:getAnswer()
     local answer = {}
     for _, idx in ipairs(self.current) do
         answer[#answer + 1] = self.scrambled[idx].letter
     end
-    if table.concat(answer) == self.secret then
-        self.wins = self.wins + 1
-        return "win"
-    else
-        self.losses = self.losses + 1
-        return "wrong"
-    end
+    return table.concat(answer)
 end
 
 function AnagramBoard:getDisplay()
@@ -155,6 +247,10 @@ function AnagramBoard:serialize()
         current   = self.current,
         wins      = self.wins,
         losses    = self.losses,
+        result    = self.result,
+        targets   = self.targets,
+        found     = self.found,
+        revealed  = self.revealed,
     }
 end
 
@@ -165,6 +261,7 @@ function AnagramBoard:load(data)
     self.secret  = data.secret  or ""
     self.wins    = data.wins    or 0
     self.losses  = data.losses  or 0
+    self.result  = data.result
     self.scrambled = {}
     for _, s in ipairs(data.scrambled or {}) do
         self.scrambled[#self.scrambled + 1] = { letter = s[1], used = s[2] or false }
@@ -172,6 +269,14 @@ function AnagramBoard:load(data)
     self.current = {}
     for _, v in ipairs(data.current or {}) do
         self.current[#self.current + 1] = v
+    end
+    if data.targets then
+        self.targets  = data.targets
+        self.found    = data.found or {}
+        self.revealed = data.revealed or {}
+    else
+        -- A game saved before answer rows existed: one row per drawn word.
+        self:_setTargets()
     end
     return true
 end

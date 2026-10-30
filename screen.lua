@@ -7,8 +7,6 @@ local function lrequire(name)
     return package.loaded[key]
 end
 
-local ButtonTable     = require("ui/widget/buttontable")
-local Device          = require("device")
 local FrameContainer  = require("ui/widget/container/framecontainer")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan  = require("ui/widget/horizontalspan")
@@ -24,8 +22,6 @@ local MenuHelper           = require("menu_helper")
 local AnagramBoard         = lrequire("board")
 local AnagramBoardWidget   = lrequire("board_widget")
 
-local DeviceScreen = Device.screen
-
 -- ---------------------------------------------------------------------------
 -- AnagramScreen
 -- ---------------------------------------------------------------------------
@@ -36,8 +32,10 @@ Anagram — Rules
 Rearrange the scrambled letters to form a valid word.
 
 All letters must be used exactly once.
-Tap a scrambled letter to add it to your answer, or tap a letter in the answer to return it to the scramble.
+Tap a letter tile (bottom row) to add it to your answer, or tap a letter in the answer to return it to the tiles.
 Submit your answer when you think you have the right word.
+Some letters make several words: there is one answer row per word to find, and the round is won once every row is filled. Any real word that uses all the letters fills a row.
+A wrong answer costs nothing: the letters go back, try again. Give up shows the words you missed and counts as a loss.
 ]])
 
 local GAME_RULES_FR = [[
@@ -46,8 +44,10 @@ Anagramme — Règles
 Réarrangez les lettres mélangées pour former un mot valide.
 
 Toutes les lettres doivent être utilisées exactement une fois.
-Appuyez sur une lettre mélangée pour l'ajouter à votre réponse, ou sur une lettre de la réponse pour la remettre dans le mélange.
+Appuyez sur une tuile (rangée du bas) pour l'ajouter à votre réponse, ou sur une lettre de la réponse pour la remettre avec les tuiles.
 Soumettez votre réponse quand vous pensez avoir trouvé le bon mot.
+Certaines lettres forment plusieurs mots : il y a une ligne de réponse par mot à trouver, et la partie est gagnée quand toutes les lignes sont remplies. Tout vrai mot qui utilise toutes les lettres remplit une ligne.
+Une mauvaise réponse ne coûte rien : les lettres reviennent, réessayez. Abandonner montre les mots manqués et compte comme une défaite.
 ]]
 
 local AnagramScreen = ScreenBase:extend{}
@@ -68,13 +68,7 @@ function AnagramScreen:serializeState()
 end
 
 function AnagramScreen:buildLayout()
-    local sw           = DeviceScreen:getWidth()
-    local sh = DeviceScreen:getHeight()
     local is_landscape = self:isLandscape()
-
-    local btn_width = is_landscape
-        and math.max(math.floor(sw * 0.38), 120)
-        or  math.floor(sw * 0.9)
 
     local title_bar = self:buildTitleBar(_("Anagram"), function()
         return {
@@ -85,63 +79,56 @@ function AnagramScreen:buildLayout()
         }
     end)
 
-    local footer_buttons = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = btn_width,
-        buttons = {{
-            { text = _("Submit"), callback = function() self:onSubmit() end },
-            { text = _("Clear"),  callback = function() self:onClear() end },
-        }},
+    self.status_text:setMaxWidth(self:getControlsWidth())
+    local controls = VerticalGroup:new{
+        align = "center",
+        self.status_text,
+        VerticalSpan:new{ width = Size.span.vertical_large },
+        self:buildActionBar(self:_actionRows(is_landscape)),
     }
 
-    local margin      = Size.margin.default
-    local padding     = Size.padding.large
-    local frame_extra = (padding + margin) * 2
-
-    local board_max_w = is_landscape and math.floor(sw * 0.55) or sw - frame_extra
-    local board_max_h = math.floor(sh * 0.25)
-    board_max_w = math.max(board_max_w, 80)
-    board_max_h = math.max(board_max_h, 60)
+    local frame_pad   = Size.padding.large
+    local frame_extra = 2 * (frame_pad + Size.border.window)
+    local budget_w, budget_h = self:getBoardBudget(title_bar, controls)
 
     self.board_widget = AnagramBoardWidget:new{
         board       = self.board,
-        max_width   = board_max_w,
-        max_height  = board_max_h,
+        max_width   = math.max(budget_w - frame_extra, 80),
+        max_height  = math.max(budget_h - frame_extra, 60),
         letterTapCallback = function(i) self:onLetterTap(i) end,
     }
 
     local board_frame = FrameContainer:new{
-        padding = padding,
-        margin  = margin,
+        padding = frame_pad,
+        margin  = 0,
         self.board_widget,
     }
 
-    self.status_text:setMaxWidth(is_landscape and btn_width or (self.board_widget.w + frame_extra))
-
     if is_landscape then
-        local right = VerticalGroup:new{
-            align = "center",
-            self.status_text,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            footer_buttons,
-        }
         local content = HorizontalGroup:new{
-            align  = "center",
+            align = "center",
             board_frame,
-            HorizontalSpan:new{ width = Size.span.horizontal_default },
-            right,
+            HorizontalSpan:new{ width = self:getGutter() },
+            controls,
         }
         self:buildLandscapeLayout(title_bar, content)
     else
-        local content = VerticalGroup:new{
-            align = "center",
-            board_frame,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            self.status_text,
-        }
-        self:buildPortraitLayout(title_bar, content, footer_buttons)
+        self:buildPortraitLayout(title_bar, board_frame,
+            VerticalGroup:new{ align = "center", controls, VerticalSpan:new{ width = self:getGutter() } })
     end
     self:updateStatus()
+end
+
+-- Three labels squeeze in the narrow landscape side panel, so there Submit
+-- gets its own row above the two others.
+function AnagramScreen:_actionRows(is_landscape)
+    local submit  = { text = _("Submit"),  callback = function() self:onSubmit() end }
+    local clear   = { text = _("Clear"),   callback = function() self:onClear() end }
+    local give_up = { text = _("Give up"), callback = function() self:onGiveUp() end }
+    if is_landscape then
+        return { { submit }, { clear, give_up } }
+    end
+    return { submit, clear, give_up }
 end
 
 function AnagramScreen:onLetterTap(i)
@@ -152,18 +139,39 @@ function AnagramScreen:onLetterTap(i)
 end
 
 function AnagramScreen:onSubmit()
+    local answer = self.board:getAnswer()
     local result = self.board:submit()
     if result == "too_short" then
         self:updateStatus(_("Not enough letters!"))
-    elseif result == "win" then
-        self:updateStatus(T(_("Correct! Wins: %1"), self.board.wins))
-        self.plugin:saveState(self.board:serialize())
     elseif result == "wrong" then
-        self:updateStatus(T(_("Wrong! The word was: %1  Losses: %2"),
-            self.board.secret, self.board.losses))
-        self.plugin:saveState(self.board:serialize())
+        self:updateStatus(_("Not that one, try again."))
+    elseif result == "already" then
+        self:updateStatus(T(_("Already found: %1"), answer))
+    elseif result == "found" then
+        local left = self.board:getRowCount() - #self.board.found
+        self:updateStatus(T(_("%1 found! %2 more to find."), answer, left))
+    else
+        self:updateStatus()
     end
+    self.plugin:saveState(self.board:serialize())
     self.board_widget:refresh()
+    self:refreshActionBar()
+end
+
+function AnagramScreen:onGiveUp()
+    self.board:giveUp()
+    self.plugin:saveState(self.board:serialize())
+    self.board_widget:refresh()
+    self:updateStatus()
+    self:refreshActionBar()
+end
+
+function AnagramScreen:isRoundOver()
+    return self.board:isOver()
+end
+
+function AnagramScreen:getRoundOverButtons()
+    return { { text = _("Next word"), callback = function() self:onNewGame() end } }
 end
 
 function AnagramScreen:onClear()
@@ -218,7 +226,7 @@ function AnagramScreen:openLengthMenu()
         { id = "7",       text = _("7 letters") },
     }
     MenuHelper.openPickerMenu{
-        title      = _("Word lengths"),
+        title      = _("Length"),
         items      = items,
         current_id = self.plugin:getSetting("length", "random"),
         parent     = self,
@@ -232,17 +240,32 @@ end
 
 function AnagramScreen:updateStatus(msg)
     local status
+    local b = self.board
+    local rows = b:getRowCount()
     if msg then
         status = msg
+    elseif b.result == "win" and rows > 1 then
+        status = T(_("All %1 words found! Wins: %2"), rows, b.wins)
+    elseif b.result == "win" and b.found[1] ~= b.secret then
+        status = T(_("Correct! %1 works too. Wins: %2"), b.secret, b.wins)
+    elseif b.result == "win" then
+        status = T(_("Correct! Wins: %1"), b.wins)
+    elseif b.result == "lost" and rows > 1 then
+        status = T(_("Found %1 of %2."), #b.found, rows)
+    elseif b.result == "lost" then
+        status = T(_("The word was: %1"), b.secret)
     else
-        status = T(_("Wins: %1  Losses: %2"), self.board.wins, self.board.losses)
+        status = self:joinStatus(
+            rows > 1 and T(_("Words: %1/%2"), #b.found, rows) or nil,
+            T(_("Wins: %1"),   b.wins),
+            T(_("Losses: %1"), b.losses))
     end
     ScreenBase.updateStatus(self, status)
 end
 
 function AnagramScreen:_langLabel()
     local lang = self.plugin:getSetting("lang", "en")
-    return lang == "fr" and "FR" or "EN"
+    return T(_("Language: %1"), lang == "fr" and "FR" or "EN")
 end
 
 function AnagramScreen:_lengthLabel()

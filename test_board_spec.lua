@@ -11,6 +11,30 @@ package.preload["ui/time"] = function()
 end
 package.path = DIR .. "common/?.lua;" .. DIR .. "?.lua;" .. package.path
 
+-- Places a fixed puzzle (secret word, tiles in the given order) on a board.
+local function setPuzzle(b, secret, tiles)
+    b.secret    = secret
+    b.scrambled = {}
+    for i = 1, #tiles do
+        b.scrambled[i] = { letter = tiles:sub(i, i), used = false }
+    end
+    b.current = {}
+    b.result  = nil
+    b:_setTargets()
+end
+
+-- Taps the tiles that spell `word`, in order.
+local function spell(b, word)
+    for i = 1, #word do
+        for j, slot in ipairs(b.scrambled) do
+            if not slot.used and slot.letter == word:sub(i, i) then
+                b:tapLetter(j)
+                break
+            end
+        end
+    end
+end
+
 describe("AnagramBoard", function()
     local Board
 
@@ -66,34 +90,100 @@ describe("AnagramBoard", function()
             assert.are.equal("too_short", b:submit())
         end)
 
-        it("returns win and increments wins when the secret is reassembled", function()
-            local b = Board:new()
-            -- Reconstruct the secret by tapping tiles in the order that
-            -- spells it out (scrambled tiles carry the letters, in some order).
-            local remaining = {}
-            for i = 1, #b.secret do remaining[i] = true end
-            for i = 1, #b.secret do
-                local ch = b.secret:sub(i, i)
-                for j, slot in ipairs(b.scrambled) do
-                    if remaining[j] and slot.letter == ch then
-                        b:tapLetter(j)
-                        remaining[j] = nil
-                        break
-                    end
-                end
-            end
+        it("returns win and increments wins when a one-word puzzle is solved", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "ZEBRA", "RBZAE")
+            assert.are.equal(1, b:getRowCount())
+            spell(b, "ZEBRA")
             assert.are.equal("win", b:submit())
             assert.are.equal(1, b.wins)
+            assert.is_true(b:isOver())
+        end)
+
+        it("shows one answer row per drawn word made of the letters", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            assert.is_true(b:getRowCount() >= 2)   -- STABLE, TABLES...
+            local has = {}
+            for _, w in ipairs(b.targets) do has[w] = true end
+            assert.is_true(has.STABLE and has.TABLES)
+        end)
+
+        it("fills a row per word found and wins once every row is filled", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            local rows = b:getRowCount()
+            for i, w in ipairs(b.targets) do
+                spell(b, w)
+                assert.are.equal(i < rows and "found" or "win", b:submit())
+                assert.are.same({}, b.current)
+            end
+            assert.are.equal(1, b.wins)
+            assert.is_true(b:isOver())
+        end)
+
+        it("refuses a word already found, at no cost", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            spell(b, "STABLE"); b:submit()
+            spell(b, "STABLE")
+            assert.are.equal("already", b:submit())
+            assert.are.equal(1, #b.found)
+        end)
+
+        it("accepts a rare dictionary word to fill a row", function()
+            local b = Board:new({ lang = "fr" })
+            setPuzzle(b, "FUSIBLE", "BLEUSIF")
+            assert.are.equal(1, b:getRowCount())
+            spell(b, "FIBULES")
+            assert.are.equal("win", b:submit())
+        end)
+
+        it("lets the player retry after a wrong answer, at no cost", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            spell(b, "SLBTEA")
+            assert.are.equal("wrong", b:submit())
+            assert.are.equal(0, b.losses)
+            assert.are.same({}, b.current)
+            assert.is_false(b:isOver())
         end)
     end)
 
-    describe("clearCurrent", function()
-        it("empties current and un-marks tiles as used", function()
-            local b = Board:new()
-            b:tapLetter(1)
-            b:clearCurrent()
+    describe("giveUp", function()
+        it("counts a loss and reveals the words not found in the empty rows", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            spell(b, "TABLES"); b:submit()
+            b:giveUp()
+            assert.are.equal(1, b.losses)
+            assert.is_true(b:isOver())
+            assert.are.equal(b:getRowCount(), #b.found + #b.revealed)
+            for _, w in ipairs(b.revealed) do assert.are_not.equal("TABLES", w) end
+            b:tapLetter(1)  -- ignored once over
             assert.are.same({}, b.current)
-            assert.is_false(b.scrambled[1].used)
+        end)
+
+        it("newGame starts a fresh round", function()
+            local b = Board:new()
+            b:giveUp()
+            b:newGame()
+            assert.is_false(b:isOver())
+            assert.are.same({}, b.found)
+            assert.are.same({}, b.revealed)
+        end)
+    end)
+
+    describe("word lists", function()
+        it("never draws proper nouns or blocked words", function()
+            for _, lang in ipairs({ "en", "fr" }) do
+                local words = dofile(DIR .. "words_" .. lang .. ".lua")
+                local set = {}
+                for _, w in ipairs(words) do set[w] = true end
+                assert.is_nil(set.DAVID)
+                assert.is_nil(set.SHIT)
+                assert.is_nil(set.PUTE)
+            end
         end)
     end)
 
@@ -108,6 +198,26 @@ describe("AnagramBoard", function()
             assert.are.equal(b.secret, b2.secret)
             assert.are.same({ 1 }, b2.current)
             assert.are.equal(#b.scrambled, #b2.scrambled)
+        end)
+
+        it("round-trips a finished round", function()
+            local b = Board:new()
+            b:giveUp()
+            local b2 = Board:new()
+            assert.is_true(b2:load(b:serialize()))
+            assert.is_true(b2:isOver())
+            assert.are.equal(1, b2.losses)
+            assert.are.same(b.revealed, b2.revealed)
+        end)
+
+        it("rebuilds the answer rows of a game saved before they existed", function()
+            local b = Board:new({ lang = "en" })
+            setPuzzle(b, "STABLE", "LBTEAS")
+            local data = b:serialize()
+            data.targets, data.found, data.revealed = nil, nil, nil
+            local b2 = Board:new()
+            assert.is_true(b2:load(data))
+            assert.are.equal(b:getRowCount(), b2:getRowCount())
         end)
 
         it("load returns false for invalid data", function()
