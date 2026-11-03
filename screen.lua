@@ -31,13 +31,13 @@ local Rules                = lrequire("rules")
 local AnagramScreen = ScreenBase:extend{}
 
 function AnagramScreen:init()
-    local state  = self.plugin:loadState()
-    local lang   = self.plugin:getSetting("lang", "en")
-    local length = self.plugin:getSetting("length", "random")
-    self.board   = AnagramBoard:new{ lang = lang, length = length }
-    if not self.board:load(state) then
-        -- fresh game
-    end
+    -- A saved game is restored; otherwise a fresh word is drawn.
+    self.board = AnagramBoard:new{
+        lang   = self.plugin:getSetting("lang", "en"),
+        length = self.plugin:getSetting("length", "random"),
+        plugin = self.plugin,
+        data   = self.plugin:loadState(),
+    }
     ScreenBase.init(self)
 end
 

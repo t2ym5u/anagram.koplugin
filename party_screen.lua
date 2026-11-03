@@ -46,7 +46,7 @@ end
 local PartyScreen = ScreenBase:extend{}
 
 function PartyScreen:init()
-    self.match = Match.load(self.plugin:loadState(STATE_KEY))
+    self.match = Match.load(self.plugin:loadState(STATE_KEY), self.plugin)
     if not self.match then self:_newMatch() end
     ScreenBase.init(self)
     self:_startClock()
@@ -60,6 +60,7 @@ function PartyScreen:_newMatch()
         lang       = self.plugin:getSetting("lang", "en"),
         length     = self.plugin:getSetting("length", "random"),
         time_limit = self.plugin:getSetting("party_time", Match.DEFAULT_TIME),
+        plugin     = self.plugin,
     }
     self.match:nextWord()
     self:_save()

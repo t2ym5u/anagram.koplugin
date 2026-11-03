@@ -16,6 +16,7 @@ Rearrange the scrambled letters to form a valid word, using every letter exactly
 - **One row per word** — STABLE and TABLES make two rows; every real word that uses all the letters fills one
 - **No penalty for a wrong guess** — the letters go back and you try again; **Give up** shows the missed words and counts a loss
 - **Clean word lists** — no proper nouns, abbreviations or vulgar words
+- **No repeats** — the puzzles already played are remembered (STABLE played means no TABLES either): a word only comes back once about 3,000 others have been played, in solo and multiplayer alike
 - **Auto-save** — current puzzle restored on next launch
 
 ## Multiplayer

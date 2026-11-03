@@ -34,9 +34,11 @@ function Match.wordPoints(word)
     return math.max(1, #(word or "") - 3)
 end
 
--- opts: names, total, lang, length, time_limit
+-- opts: names, total, lang, length, time_limit, plugin (settings holder for
+-- the puzzle history shared with the solo game; none in the specs)
 function Match.new(opts)
     local m = setmetatable({
+        plugin     = opts.plugin,
         scores     = Party.newScores(opts.names or {}),
         total      = opts.total or Match.DEFAULT_WORDS,
         lang       = opts.lang or "en",
@@ -57,14 +59,15 @@ function Match:isOver()
     return self.phase == "over"
 end
 
--- Draws the next word (never one already played this match) and scrambles it.
+-- Draws the next word and scrambles it: never one already played this match
+-- (nor its anagram: the same letters), and through the solo game's puzzle
+-- history, so a word seen before waits until the list is used up.
 function Match:nextWord()
     if self.phase ~= "scored" then return false end
-    local board = AnagramBoard:new{ lang = self.lang, length = self.length }
-    for _i = 1, 20 do
-        if not self.used[board.secret] then break end
-        board:newGame()
-    end
+    local exclude = {}
+    for w in pairs(self.used) do exclude[AnagramBoard.letterSet(w)] = true end
+    local board = AnagramBoard:new{ lang = self.lang, length = self.length,
+                                    plugin = self.plugin, exclude = exclude }
     local letters = {}
     for i, s in ipairs(board.scrambled) do letters[i] = s.letter end
     self.secret    = board.secret
@@ -150,7 +153,7 @@ end
 
 local PHASES = { playing = true, answer = true, scored = true, over = true }
 
-function Match.load(t)
+function Match.load(t, plugin)
     if type(t) ~= "table" or not PHASES[t.phase] then return nil end
     local scores = Party.restoreScores(t.scores)
     if not scores or type(t.secret) ~= "string" or type(t.letters) ~= "string"
@@ -160,6 +163,7 @@ function Match.load(t)
     local m = Match.new{
         names = scores.names, total = tonumber(t.total), lang = t.lang,
         length = t.length, time_limit = tonumber(t.time_limit) or 0,
+        plugin = plugin,
     }
     m.scores    = scores
     m.phase     = t.phase
