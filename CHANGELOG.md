@@ -6,6 +6,15 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.6.0] - 2026-11-03
+
+### Changed
+- No more repeated puzzles: the game remembers the words already played, per
+  language, and draws a new one each time, whatever the length setting; a
+  word only comes back once about 3,000 others have been played. A word's
+  anagrams count as played too (after STABLE, no TABLES). The solo game and
+  multiplayer matches share this memory.
+
 ## [1.5.0] - 2026-11-02
 
 ### Added

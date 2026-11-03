@@ -62,6 +62,26 @@ local function otherAnswers(lang)
     return ANSWERS[lang]
 end
 
+-- Puzzles already played, remembered in the plugin settings (game-common
+-- seen_history.lua), one history per language whatever the length setting:
+-- a new word is one not seen yet, and a word only comes back once its whole
+-- list has been played (about 3,000 puzzles: the oldest are forgotten past
+-- SEEN_MAX). A word is remembered by its letters, so STABLE played means
+-- TABLES -- the same puzzle -- waits too.
+local SeenHistory = require("seen_history")
+local SEEN_MAX = 3000
+
+-- Memoised: a draw looks up the letters of every word of the pool.
+local LETTER_SETS = {}
+local function letterSet(word)
+    local k = LETTER_SETS[word]
+    if not k then
+        k = sortedLetters(word:upper())
+        LETTER_SETS[word] = k
+    end
+    return k
+end
+
 -- ---------------------------------------------------------------------------
 -- AnagramBoard
 -- ---------------------------------------------------------------------------
@@ -69,9 +89,16 @@ end
 local AnagramBoard = {}
 AnagramBoard.__index = AnagramBoard
 
+-- opts.plugin : settings holder for the puzzle history (none: plain random,
+--               as in the specs); opts.data : a saved game to restore instead
+--               of drawing a word (obj.loaded tells whether it worked);
+--               opts.exclude : set of letter sets (AnagramBoard.letterSet)
+--               this board must not draw -- a party match's earlier words.
 function AnagramBoard:new(opts)
     opts = opts or {}
     local obj = setmetatable({
+        plugin   = opts.plugin,
+        exclude  = opts.exclude,
         lang     = opts.lang or "en",
         length   = opts.length or "random",
         secret   = "",
@@ -81,7 +108,8 @@ function AnagramBoard:new(opts)
         losses   = opts.losses or 0,
         result   = nil,   -- nil while playing, "win" or "lost" once over
     }, self)
-    obj:newGame()
+    obj.loaded = opts.data ~= nil and obj:load(opts.data) or false
+    if not obj.loaded then obj:newGame() end
     return obj
 end
 
@@ -100,7 +128,20 @@ function AnagramBoard:newGame()
         list = self:_wordListByLen()[len]
     end
     list = list or self:_wordList()
-    local word = list[math.random(#list)]
+    if self.exclude then
+        local left = {}
+        for _i, w in ipairs(list) do
+            if not self.exclude[letterSet(w)] then left[#left + 1] = w end
+        end
+        if #left > 0 then list = left end
+    end
+    local word
+    if self.plugin then
+        word = SeenHistory.open(self.plugin, "words_" .. self.lang,
+                                { max = SEEN_MAX, id_of = letterSet }):pick(list)
+    else
+        word = list[math.random(#list)]
+    end
     self.secret = word:upper()
 
     -- scramble: shuffle and ensure result != original
@@ -298,5 +339,7 @@ function AnagramBoard:load(data)
     end
     return true
 end
+
+AnagramBoard.letterSet = letterSet
 
 return AnagramBoard
