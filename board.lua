@@ -140,6 +140,24 @@ function AnagramBoard:_setTargets()
     self.revealed = {}
 end
 
+-- Every word made of exactly these letters that the plugin knows -- the
+-- drawn words, then the rarer ones of answers_<lang>.lua -- alphabetical
+-- (the multiplayer reveal lists them all).
+function AnagramBoard.anagramsOf(lang, letters)
+    letters = letters:upper()
+    local key, seen, out = sortedLetters(letters), {}, {}
+    local function add(w)
+        if not seen[w] then seen[w] = true; out[#out + 1] = w end
+    end
+    for _, w in ipairs(wordsWithLetters(lang, letters)) do add(w) end
+    for w in pairs(otherAnswers(lang)) do
+        if #w == #key and sortedLetters(w) == key then add(w) end
+    end
+    if #out == 0 then add(letters) end
+    table.sort(out)
+    return out
+end
+
 function AnagramBoard:getRowCount()
     return #self.targets
 end

@@ -22,4 +22,18 @@ return {
     ["6 letters"]                          = { fr = "6 lettres", es = "6 letras", de = "6 Buchstaben" },
     ["7 letters"]                          = { fr = "7 lettres", es = "7 letras", de = "7 Buchstaben" },
     ["Length: %1"]                         = { fr = "Longueur : %1", es = "Longitud: %1", de = "Länge: %1" },
+    -- Multiplayer mode (party_screen.lua); shared keys keep the other plugins' text
+    ["Mode"]                               = { fr = "Mode", es = "Modo", de = "Modus" },
+    ["Words: %1"]                          = { fr = "Mots : %1", es = "Palabras: %1", de = "Wörter: %1" },
+    ["Words"]                              = { fr = "Mots", es = "Palabras", de = "Wörter" },
+    ["Timer: %1"]                          = { fr = "Chrono : %1", es = "Temporizador: %1", de = "Timer: %1" },
+    ["Timer"]                              = { fr = "Chrono", es = "Temporizador", de = "Timer" },
+    ["%1 s"]                               = { fr = "%1 s", es = "%1 s", de = "%1 s" },
+    ["%1 min"]                             = { fr = "%1 min", es = "%1 min", de = "%1 Min" },
+    ["Shuffle"]                            = { fr = "Mélanger", es = "Mezclar", de = "Mischen" },
+    ["Answer"]                             = { fr = "Réponse", es = "Respuesta", de = "Antwort" },
+    ["Time's up!"]                         = { fr = "Temps écoulé !", es = "¡Se acabó el tiempo!", de = "Zeit abgelaufen!" },
+    ["Word %1/%2"]                         = { fr = "Mot %1/%2", es = "Palabra %1/%2", de = "Wort %1/%2" },
+    ["%1 found it: +%2"]                   = { fr = "%1 a trouvé : +%2", es = "%1 la encontró: +%2", de = "%1 hat es gefunden: +%2" },
+    ["Nobody found it."]                   = { fr = "Personne n'a trouvé.", es = "Nadie la encontró.", de = "Niemand hat es gefunden." },
 }

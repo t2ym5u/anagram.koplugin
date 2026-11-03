@@ -14,14 +14,19 @@ local _              = require("i18n")
 
 require("i18n").extend(lrequire("i18n_fr"))
 local AnagramScreen  = lrequire("screen")
+local PartyScreen    = lrequire("party_screen")
 
 local Anagram = PluginBase:extend{
     name      = "anagram",
     menu_text = _("Anagram"),
     menu_hint = "tools",
+    party_mode = true,
 }
 
 function Anagram:createScreen()
+    if self.launch_mode == "party" then
+        return PartyScreen:new{ plugin = self }
+    end
     return AnagramScreen:new{ plugin = self }
 end
 

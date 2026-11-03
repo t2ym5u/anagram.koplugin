@@ -6,6 +6,32 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.5.0] - 2026-11-02
+
+### Added
+- A multiplayer mode, "Anagram · multiplayer" under Tools → Games → Party &
+  quiz (or "Mode: Multiplayer" in the game's menu). The reader lies on the
+  table and shows the scrambled letters big; the first player to shout a word
+  using every letter wins it. "Answer" reveals every word the letters make
+  (the drawn one and the rarer ones the dictionary knows), then one tap on the
+  finder's name -- or Nobody -- gives the point.
+- A word is worth its length minus 3 (4 letters = 1 point, 7 letters = 4), so
+  with "Length: Random" a long word is worth more.
+- Settings: players and their names (remembered), words per match (5 to 20),
+  a timer per word (off, 30 s to 2 min: the answer shows by itself when time
+  is up), Shuffle to mix the letters again. The match ends with the final
+  scoreboard and "New game"; a match in progress is saved apart from the solo
+  game and restored.
+- Rules has two complete texts, solo and multiplayer: it opens the one of the
+  mode being played, with a button to read the other.
+
+### Changed
+- Family-friendly words: `tools/blocklist_<lang>.txt` now covers vulgar,
+  sexual, scatological, slur and drug-related words and their inflections,
+  and the word data was rebuilt -- 25 English and 66 French words are no
+  longer drawn, and the reveal no longer lists 21 English / 43 French
+  blocked anagrams (e.g. NIGGER, TWAT, PISSER, FION).
+
 ## [1.4.1] - 2026-11-02
 
 ### Changed

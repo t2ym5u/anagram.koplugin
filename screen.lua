@@ -21,34 +21,12 @@ local ScreenBase           = require("screen_base")
 local MenuHelper           = require("menu_helper")
 local AnagramBoard         = lrequire("board")
 local AnagramBoardWidget   = lrequire("board_widget")
+local Mode                 = lrequire("mode")
+local Rules                = lrequire("rules")
 
 -- ---------------------------------------------------------------------------
 -- AnagramScreen
 -- ---------------------------------------------------------------------------
-
-local GAME_RULES_EN = _([[
-Anagram — Rules
-
-Rearrange the scrambled letters to form a valid word.
-
-All letters must be used exactly once.
-Tap a letter tile (bottom row) to add it to your answer, or tap a letter in the answer to return it to the tiles.
-Submit your answer when you think you have the right word.
-Some letters make several words: there is one answer row per word to find, and the round is won once every row is filled. Any real word that uses all the letters fills a row.
-A wrong answer costs nothing: the letters go back, try again. Give up shows the words you missed and counts as a loss.
-]])
-
-local GAME_RULES_FR = [[
-Anagramme — Règles
-
-Réarrangez les lettres mélangées pour former un mot valide.
-
-Toutes les lettres doivent être utilisées exactement une fois.
-Appuyez sur une tuile (rangée du bas) pour l'ajouter à votre réponse, ou sur une lettre de la réponse pour la remettre avec les tuiles.
-Soumettez votre réponse quand vous pensez avoir trouvé le bon mot.
-Certaines lettres forment plusieurs mots : il y a une ligne de réponse par mot à trouver, et la partie est gagnée quand toutes les lignes sont remplies. Tout vrai mot qui utilise toutes les lettres remplit une ligne.
-Une mauvaise réponse ne coûte rien : les lettres reviennent, réessayez. Abandonner montre les mots manqués et compte comme une défaite.
-]]
 
 local AnagramScreen = ScreenBase:extend{}
 
@@ -75,7 +53,8 @@ function AnagramScreen:buildLayout()
             { text = _("New game"),       callback = function() self:onNewGame() end },
             { text = self:_langLabel(),   callback = function() self:openLangMenu() end },
             { text = self:_lengthLabel(), callback = function() self:openLengthMenu() end },
-            self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
+            { text = Mode.label(self.plugin), callback = function() Mode.openMenu(self) end },
+            self:makeModeRulesButtonConfig(Rules),
         }
     end)
 

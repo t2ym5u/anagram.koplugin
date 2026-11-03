@@ -18,6 +18,22 @@ Rearrange the scrambled letters to form a valid word, using every letter exactly
 - **Clean word lists** — no proper nouns, abbreviations or vulgar words
 - **Auto-save** — current puzzle restored on next launch
 
+## Multiplayer
+
+**Anagram · multiplayer** (Tools → Games → Party & quiz, or **Mode** in the
+game's menu) turns the reader into the board of a shouting game: lay it in
+the middle of the table, the scrambled letters fill the screen, and the first
+player to shout a real word using every letter wins it.
+
+- Tap **Answer** when someone shouts (or let the timer run out): every word
+  the letters make is shown, then tap the finder's name, or **Nobody**.
+- A word is worth its length minus 3: 4 letters = 1 point … 7 letters = 4.
+- Menu: **Players**, **Player names** (remembered), **Words** per match (5–20),
+  **Timer** per word (off, 30 s – 2 min), **Language**, **Length**, **Scores**.
+- **Shuffle** mixes the letters again. After the last word: the final
+  scoreboard, and **New game**. A match in progress is saved and restored,
+  separately from the solo game.
+
 ## Installation
 
 1. Download `anagram.koplugin.zip` from the [latest release](../../releases/latest).
