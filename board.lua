@@ -11,8 +11,12 @@ local function loadWordList(name)
     return fn and fn() or {}
 end
 
-local WORDS_EN = loadWordList("words_en")
-local WORDS_FR = loadWordList("words_fr")
+-- A language's word data -- its word list, the list by length, the drawn
+-- words grouped by their letters and the rarer answers -- loads the first
+-- time that language is played, not with the module, and only that
+-- language's. AnagramBoard.release() (the screen closing) drops it all: the
+-- lists are quick to read again and are only needed while a game is open.
+local DATA = {}
 
 local function groupByLength(list)
     local by_len = {}
@@ -25,8 +29,16 @@ local function groupByLength(list)
     return by_len
 end
 
-local WORDS_EN_BY_LEN = groupByLength(WORDS_EN)
-local WORDS_FR_BY_LEN = groupByLength(WORDS_FR)
+local function langData(lang)
+    lang = lang == "fr" and "fr" or "en"
+    local d = DATA[lang]
+    if not d then
+        local words = loadWordList("words_" .. lang)
+        d = { words = words, by_len = groupByLength(words) }
+        DATA[lang] = d
+    end
+    return d
+end
 
 local function sortedLetters(word)
     local t = {}
@@ -37,29 +49,29 @@ end
 
 -- The drawn words grouped by their letters: a puzzle shows one answer row per
 -- drawn word made of its letters (STABLE, TABLES: two rows). Built on the
--- first puzzle of a language, not at startup.
-local BY_LETTERS = {}
+-- first puzzle of a language.
 local function wordsWithLetters(lang, letters)
-    if not BY_LETTERS[lang] then
+    local d = langData(lang)
+    if not d.by_letters then
         local index = {}
-        for _, w in ipairs(lang == "fr" and WORDS_FR or WORDS_EN) do
+        for _, w in ipairs(d.words) do
             local k = sortedLetters(w)
             index[k] = index[k] or {}
             table.insert(index[k], w)
         end
-        BY_LETTERS[lang] = index
+        d.by_letters = index
     end
-    return BY_LETTERS[lang][sortedLetters(letters)] or {}
+    return d.by_letters[sortedLetters(letters)] or {}
 end
 
 -- Other real words made of the same letters (answers_<lang>.lua, generated
--- from boggle's full dictionary). Loaded on the first answer, not at startup.
-local ANSWERS = {}
+-- from boggle's full dictionary). Loaded on the first answer.
 local function otherAnswers(lang)
-    if not ANSWERS[lang] then
-        ANSWERS[lang] = loadWordList("answers_" .. lang)
+    local d = langData(lang)
+    if not d.answers then
+        d.answers = loadWordList("answers_" .. (lang == "fr" and "fr" or "en"))
     end
-    return ANSWERS[lang]
+    return d.answers
 end
 
 -- Puzzles already played, remembered in the plugin settings (game-common
@@ -114,11 +126,11 @@ function AnagramBoard:new(opts)
 end
 
 function AnagramBoard:_wordList()
-    return self.lang == "fr" and WORDS_FR or WORDS_EN
+    return langData(self.lang).words
 end
 
 function AnagramBoard:_wordListByLen()
-    return self.lang == "fr" and WORDS_FR_BY_LEN or WORDS_EN_BY_LEN
+    return langData(self.lang).by_len
 end
 
 function AnagramBoard:newGame()
@@ -341,5 +353,20 @@ function AnagramBoard:load(data)
 end
 
 AnagramBoard.letterSet = letterSet
+
+-- Drops every loaded word list (called when the game screen closes); the
+-- next game reads its language's lists again.
+function AnagramBoard.release()
+    DATA = {}
+    LETTER_SETS = {}
+end
+
+-- The languages whose word data is loaded now (for the specs).
+function AnagramBoard.loadedLanguages()
+    local out = {}
+    for lang in pairs(DATA) do out[#out + 1] = lang end
+    table.sort(out)
+    return out
+end
 
 return AnagramBoard
