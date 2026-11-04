@@ -27,6 +27,7 @@ local MenuHelper  = require("menu_helper")
 local Party       = require("party")
 local Timer       = require("timer")
 local Match       = lrequire("party_game")
+local AnagramBoard = lrequire("board")
 local PartyWidget = lrequire("party_widget")
 local Mode        = lrequire("mode")
 local Rules       = lrequire("rules")
@@ -350,6 +351,12 @@ function PartyScreen:openLengthMenu()
             self:onNewGame()
         end,
     }
+end
+
+-- The word lists are only needed while a game is open: drop them when the
+-- screen closes (the next game reads its language's lists again).
+function PartyScreen:onCloseWidget()
+    AnagramBoard.release()
 end
 
 return PartyScreen

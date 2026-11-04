@@ -255,4 +255,10 @@ function AnagramScreen:_lengthLabel()
     return T(_("Length: %1"), length)
 end
 
+-- The word lists are only needed while a game is open: drop them when the
+-- screen closes (the next game reads its language's lists again).
+function AnagramScreen:onCloseWidget()
+    AnagramBoard.release()
+end
+
 return AnagramScreen
