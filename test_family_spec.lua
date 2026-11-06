@@ -50,4 +50,16 @@ describe("family-friendly word data", function()
         assert.is_nil(drawn.CACA)
         assert.is_nil(drawn.SUCEUR)
     end)
+
+    -- LYNCH was drawn in English before 1.6.3.
+    it("never draws lynch or its forms", function()
+        local en, fr = blocklist("en"), blocklist("fr")
+        for _, w in ipairs({ "LYNCH", "LYNCHED", "LYNCHES", "LYNCHING", "LYNCHER", "LYNCHERS" }) do
+            assert.is_true(en[w], w)
+        end
+        assert.is_true(fr.LYNCHAGE and fr.LYNCHER)
+        local drawn = {}
+        for _, w in ipairs(wordsOf("words_en")) do drawn[w] = true end
+        assert.is_nil(drawn.LYNCH)
+    end)
 end)

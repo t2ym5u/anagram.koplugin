@@ -6,6 +6,12 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.6.3] - 2026-11-05
+
+### Fixed
+- "Lynch" and its forms are added to the family-friendly blocklist (English
+  and French), so LYNCH is no longer drawn as an English word.
+
 ## [1.6.2] - 2026-11-04
 
 ### Fixed
