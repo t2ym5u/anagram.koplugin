@@ -1,5 +1,7 @@
 # Mots qu'Anagram ne tire ni n'accepte jamais : vulgaires, sexuels ou insultes.
 # Un par ligne, en majuscules sans accents. Appliqué par tools/build_words.py.
+# Passe « jeu en famille » 2026-11-02 : vulgaire, sexuel, scatologique,
+# insultes, drogue, et leurs formes fléchies.
 BITE
 BITES
 BORDEL
@@ -47,8 +49,6 @@ VIOLEE
 VIOLER
 VIOLEUR
 VIOLS
-# Passe « jeu en famille » 2026-11-02 : vulgaire, sexuel, scatologique,
-# insultes, drogue, et leurs formes fléchies.
 ANAL
 ANALE
 ANAUX
@@ -528,3 +528,32 @@ ZIZI
 ZIZIS
 ZOB
 ZOBS
+LYNCHA
+LYNCHAGE
+LYNCHAGES
+LYNCHAI
+LYNCHAIS
+LYNCHAIT
+LYNCHAMES
+LYNCHANT
+LYNCHAS
+LYNCHASSE
+LYNCHAT
+LYNCHATES
+LYNCHE
+LYNCHEE
+LYNCHEES
+LYNCHENT
+LYNCHER
+LYNCHERA
+LYNCHERAI
+LYNCHERAS
+LYNCHEREZ
+LYNCHES
+LYNCHEUR
+LYNCHEURS
+LYNCHEUSE
+LYNCHEZ
+LYNCHIEZ
+LYNCHIONS
+LYNCHONS

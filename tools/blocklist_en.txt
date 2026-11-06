@@ -1,5 +1,7 @@
 # Words Anagram never draws nor accepts: vulgar, sexual or slurs.
 # One per line, uppercase. Applied by tools/build_words.py.
+# Family-friendly sweep 2026-11-02 (the game is played at a family table):
+# vulgar, sexual, scatological, slurs, drug-related, and their inflections.
 ANAL
 ASSHOLE
 BASTARD
@@ -42,8 +44,6 @@ TITS
 VAGINA
 WHORE
 WHORES
-# Family-friendly sweep 2026-11-02 (the game is played at a family table):
-# vulgar, sexual, scatological, slurs, drug-related, and their inflections.
 ANTIPORN
 ANUS
 ARSE
@@ -345,3 +345,10 @@ WHORING
 WHORISH
 WOP
 WOPS
+LYNCH
+LYNCHED
+LYNCHER
+LYNCHERS
+LYNCHES
+LYNCHING
+LYNCHINGS
