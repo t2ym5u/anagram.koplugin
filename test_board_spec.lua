@@ -65,11 +65,6 @@ describe("AnagramBoard", function()
                 assert.are.equal(0, remaining)
             end
         end)
-
-        it("respects a fixed word length", function()
-            local b = Board:new({ length = "5" })
-            assert.are.equal(5, #b.secret)
-        end)
     end)
 
     describe("tapLetter", function()

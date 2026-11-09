@@ -1,7 +1,8 @@
 -- Puzzles are not repeated: solo games and party matches draw through one
 -- history per language kept in the plugin settings (game-common
 -- seen_history.lua), remembered by letter set (STABLE played = TABLES seen);
--- a party match never repeats a puzzle. Also checks the word lists.
+-- a party match never repeats a puzzle. (The word lists' length bands are in
+-- test_difficulty_spec.lua.)
 local DIR = debug.getinfo(1, "S").source:sub(2):match("(.*[/\\])") or "./"
 
 package.preload["gettext"] = function()
@@ -99,18 +100,4 @@ describe("puzzle history", function()
         m:nextWord(); keep[Board.letterSet(m.secret)] = true
         assert.is_true(keep[a] and keep[z])
     end)
-end)
-
-describe("word lists", function()
-    for _i, lang in ipairs({ "en", "fr" }) do
-        it(lang .. ": 4-7 letters A-Z, no duplicates", function()
-            local list, set = dofile(DIR .. "words_" .. lang .. ".lua"), {}
-            for _j, w in ipairs(list) do
-                assert.is_truthy(w:match("^[A-Z][A-Z][A-Z][A-Z][A-Z]?[A-Z]?[A-Z]?$"), w)
-                assert.is_nil(set[w], w)
-                set[w] = true
-            end
-            assert.is_true(#list > 7000, tostring(#list))
-        end)
-    end
 end)

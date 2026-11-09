@@ -6,6 +6,13 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.6.4] - 2026-11-09
+
+### Fixed
+- The scrambled letters are never one of the answers any more. Only the
+  drawn word was ruled out, so another answer could show as is (MATE drawn,
+  MEAT shown), giving that row away in about 2 % of 4-letter puzzles.
+
 ## [1.6.3] - 2026-11-05
 
 ### Fixed

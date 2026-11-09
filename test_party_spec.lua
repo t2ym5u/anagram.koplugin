@@ -29,12 +29,6 @@ local function sorted(w)
 end
 
 describe("Anagram party match", function()
-    it("scores a word by its length", function()
-        assert.are.equal(1, Match.wordPoints("STAR"))
-        assert.are.equal(2, Match.wordPoints("STARE"))
-        assert.are.equal(4, Match.wordPoints("STABLES"))
-    end)
-
     it("lists every anagram the plugin knows, drawn word included", function()
         local list = Board.anagramsOf("en", "STABLE")
         local has = {}

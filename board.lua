@@ -156,7 +156,11 @@ function AnagramBoard:newGame()
     end
     self.secret = word:upper()
 
-    -- scramble: shuffle and ensure result != original
+    -- scramble: shuffle until the result is none of the answer rows. Checking
+    -- only the drawn word let another row show as is (MATE drawn, MEAT shown:
+    -- about 2 % of 4-letter puzzles).
+    local rows = { [self.secret] = true }
+    for _, w in ipairs(wordsWithLetters(self.lang, self.secret)) do rows[w] = true end
     local letters = {}
     for i = 1, #self.secret do
         letters[i] = self.secret:sub(i, i)
@@ -168,7 +172,7 @@ function AnagramBoard:newGame()
             letters[i], letters[j] = letters[j], letters[i]
         end
         attempts = attempts + 1
-    until table.concat(letters) ~= self.secret or attempts > 20
+    until not rows[table.concat(letters)] or attempts > 50
 
     self.scrambled = {}
     for _, ch in ipairs(letters) do
