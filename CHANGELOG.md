@@ -6,6 +6,13 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.6.5] - 2026-11-09
+
+### Fixed
+- The game now starts in KOReader's language (French when KOReader is in
+  French) instead of always English; a language picked in the game holds
+  until KOReader's language changes.
+
 ## [1.6.4] - 2026-11-09
 
 ### Fixed

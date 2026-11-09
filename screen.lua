@@ -33,7 +33,7 @@ local AnagramScreen = ScreenBase:extend{}
 function AnagramScreen:init()
     -- A saved game is restored; otherwise a fresh word is drawn.
     self.board = AnagramBoard:new{
-        lang   = self.plugin:getSetting("lang", "en"),
+        lang   = self.plugin:getLang({ "fr", "en" }),
         length = self.plugin:getSetting("length", "random"),
         plugin = self.plugin,
         data   = self.plugin:loadState(),
@@ -161,7 +161,7 @@ function AnagramScreen:onClear()
 end
 
 function AnagramScreen:onNewGame()
-    local lang   = self.plugin:getSetting("lang", "en")
+    local lang   = self.plugin:getLang({ "fr", "en" })
     local length = self.plugin:getSetting("length", "random")
     self.board.lang   = lang
     self.board.length = length
@@ -183,10 +183,10 @@ function AnagramScreen:openLangMenu()
     MenuHelper.openPickerMenu{
         title      = _("Language"),
         items      = items,
-        current_id = self.plugin:getSetting("lang", "en"),
+        current_id = self.plugin:getLang({ "fr", "en" }),
         parent     = self,
         on_select  = function(lang)
-            self.plugin:saveSetting("lang", lang)
+            self.plugin:setLang(lang)
             self.board.lang = lang
             if self.lang_btn then
                 self.lang_btn:setText(self:_langLabel(), self.lang_btn.width)
@@ -243,7 +243,7 @@ function AnagramScreen:updateStatus(msg)
 end
 
 function AnagramScreen:_langLabel()
-    local lang = self.plugin:getSetting("lang", "en")
+    local lang = self.plugin:getLang({ "fr", "en" })
     return T(_("Language: %1"), lang == "fr" and "FR" or "EN")
 end
 

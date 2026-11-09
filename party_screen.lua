@@ -58,7 +58,7 @@ function PartyScreen:_newMatch()
     self.match = Match.new{
         names      = Party.loadPlayers(self.plugin, n),
         total      = self.plugin:getSetting("party_words", Match.DEFAULT_WORDS),
-        lang       = self.plugin:getSetting("lang", "en"),
+        lang       = self.plugin:getLang({ "fr", "en" }),
         length     = self.plugin:getSetting("length", "random"),
         time_limit = self.plugin:getSetting("party_time", Match.DEFAULT_TIME),
         plugin     = self.plugin,
@@ -326,7 +326,7 @@ function PartyScreen:openLangMenu()
         items = { { id = "en", text = _("English") }, { id = "fr", text = _("Français") } },
         current_id = self.match.lang, parent = self,
         on_select = function(lang)
-            self.plugin:saveSetting("lang", lang)
+            self.plugin:setLang(lang)
             self:onNewGame()
         end,
     }
