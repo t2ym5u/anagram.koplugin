@@ -6,6 +6,13 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.7.0] - 2026-11-24
+
+### Changed
+- French accepts 1,239 more answers, taken from the Grammalecte lexicon
+  (Dicollecte, MPL 2.0) through Boggle's word list: other real words made of
+  all the letters. The words drawn are unchanged.
+
 ## [1.6.10] - 2026-11-24
 
 ### Fixed

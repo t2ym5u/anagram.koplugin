@@ -1,6 +1,6 @@
 -- English: the answers Anagram accepts besides its own words (generated, do not edit).
--- Every word of the Scrabble-valid dictionary in boggle.koplugin/words_en.lua
--- that shares its letters with another word, for the letter sets of this
+-- Every word of boggle.koplugin/words_en.lua (see there for the sources
+-- and credits) that shares its letters with another word, for the letter sets of this
 -- plugin's words_en.lua: when the scramble of STABLE is answered TABLES, that
 -- is a real word made of all the letters, so it counts. 7351 words.
 -- Regenerate with tools/build_words.py (run from the monorepo root).
